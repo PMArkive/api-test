@@ -336,7 +336,9 @@ dependencies = [
 
 [[package]]
 name = "demostf-client"
-version = "0.1.2"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4806484ba6677ab29aa75bc15a89f16fa7715fc546274285ac014ecf189cf14b"
 dependencies = [
  "chrono",
  "hex",
@@ -1076,9 +1078,9 @@ dependencies = [
 
 [[package]]
 name = "num_enum"
-version = "0.4.3"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca565a7df06f3d4b485494f25ba05da1435950f4dc263440eda7a6fa9b8e36e4"
+checksum = "226b45a5c2ac4dd696ed30fa6b94b057ad909c7b7fc2e0d0808192bced894066"
 dependencies = [
  "derivative",
  "num_enum_derive",
@@ -1086,9 +1088,9 @@ dependencies = [
 
 [[package]]
 name = "num_enum_derive"
-version = "0.4.3"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffa5a33ddddfee04c0283a7653987d634e880347e96b5b2ed64de07efb59db9d"
+checksum = "1c0fd9eba1d5db0994a239e09c1be402d35622277e35468ba891aa5e3188ce7e"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -1148,22 +1150,22 @@ dependencies = [
 
 [[package]]
 name = "parse-display"
-version = "0.1.2"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd87725635cbae7fe960f91f55a114ed104e637790317cc8d9197ea16b058010"
+checksum = "12035532e456d9f4f59fcfa3834dc5f45b391d9029f5287292bf41960b05ce91"
 dependencies = [
- "lazy_static",
+ "once_cell",
  "parse-display-derive",
  "regex",
 ]
 
 [[package]]
 name = "parse-display-derive"
-version = "0.1.2"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc52b391380aa8550348736a356bf028f5469391d580533a566e97543f55e813"
+checksum = "449f5881ab953fa168d60a57dd182a3e1fdeff16bb9bdd309145fbd8f32326ec"
 dependencies = [
- "lazy_static",
+ "once_cell",
  "proc-macro2",
  "quote",
  "regex",
@@ -1812,6 +1814,8 @@ checksum = "36474e732d1affd3a6ed582781b3683df3d0563714c59c39591e8ff707cf078e"
 [[package]]
 name = "tf-demo-parser"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aefd410a68248ad4192147294341137e0068467b3f2101ee0a6528b1c36123cf"
 dependencies = [
  "bitbuffer",
  "enumflags2",

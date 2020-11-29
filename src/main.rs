@@ -21,7 +21,10 @@ macro_rules! assert_object_eq {
 #[tokio::main]
 async fn main() -> Result<()> {
     let harness = Harness::new(&dotenv::var("BASE_URL")?, &dotenv::var("DB_URL")?).await?;
-    let gully_data = include_bytes!("../data/granary.dem");
+    let granary_data = include_bytes!("../data/granary.dem");
+    let process_data = include_bytes!("../data/process.dem");
+    let warmfrost_data = include_bytes!("../data/warmfrost.dem");
+    let coalplant_data = include_bytes!("../data/coalplant.dem");
 
     Test::run(
         "Upload with invalid credentials",
@@ -31,7 +34,7 @@ async fn main() -> Result<()> {
                 let result = client
                     .upload_demo(
                         String::from("test.dem"),
-                        gully_data.to_vec(),
+                        granary_data.to_vec(),
                         String::from("RED"),
                         String::from("BLUE"),
                         String::from("wrong_token"),
@@ -58,7 +61,7 @@ async fn main() -> Result<()> {
         &harness,
         |test| async move {
             let parser =
-                DemoParser::new(BitReadBuffer::new(gully_data.to_vec(), LittleEndian).into());
+                DemoParser::new(BitReadBuffer::new(granary_data.to_vec(), LittleEndian).into());
             let (header, state) = parser
                 .parse()
                 .map_err(|_| Report::msg("Failed to parse demo"))?;
@@ -69,7 +72,7 @@ async fn main() -> Result<()> {
                     Ok(client
                         .upload_demo(
                             String::from("test.dem"),
-                            gully_data.to_vec(),
+                            granary_data.to_vec(),
                             String::from("RED"),
                             String::from("BLUE"),
                             String::from("token"),
@@ -130,7 +133,7 @@ async fn main() -> Result<()> {
                 let new_id = client
                     .upload_demo(
                         String::from("test.dem"),
-                        gully_data.to_vec(),
+                        granary_data.to_vec(),
                         String::from("RED"),
                         String::from("BLUE"),
                         String::from("token"),
@@ -145,6 +148,63 @@ async fn main() -> Result<()> {
             Ok(())
         },
     )
+    .await;
+
+    Test::run("Listings", &harness, |test| async move {
+        test.step("upload", |client| async move {
+            client
+                .upload_demo(
+                    String::from("test1.dem"),
+                    granary_data.to_vec(),
+                    String::from("RED"),
+                    String::from("BLUE"),
+                    String::from("token"),
+                )
+                .await?;
+            client
+                .upload_demo(
+                    String::from("test2.dem"),
+                    process_data.to_vec(),
+                    String::from("RED"),
+                    String::from("BLUE"),
+                    String::from("token"),
+                )
+                .await?;
+            client
+                .upload_demo(
+                    String::from("test3.dem"),
+                    warmfrost_data.to_vec(),
+                    String::from("RED"),
+                    String::from("BLUE"),
+                    String::from("token"),
+                )
+                .await?;
+            client
+                .upload_demo(
+                    String::from("test3.dem"),
+                    coalplant_data.to_vec(),
+                    String::from("RED"),
+                    String::from("BLUE"),
+                    String::from("token"),
+                )
+                .await?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list defaults", |client| async move {
+            let list = client.list(ListParams::default(), 1).await?;
+            assert_eq(list.len(), 4)?;
+            assert_eq(list[0].id, 4)?;
+            assert_eq(list[1].id, 3)?;
+            assert_eq(list[2].id, 2)?;
+            assert_eq(list[3].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        Ok(())
+    })
     .await;
 
     Ok(())
