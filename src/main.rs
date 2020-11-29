@@ -4,10 +4,10 @@ mod report;
 use crate::harness::Harness;
 use bitbuffer::{BitReadBuffer, LittleEndian};
 use color_eyre::{eyre::WrapErr, Report, Result};
-use demostf_client::{Class, Demo, SteamID, Team};
+use demostf_client::{ChatMessage, Class, Demo, SteamID, Team};
 use report::{assert_eq, Test};
 use std::str::FromStr;
-use tf_demo_parser::DemoParser;
+use tf_demo_parser::{demo::header::Header, DemoParser, MatchState};
 
 macro_rules! assert_object_eq {
     ($obj:expr => { $($name:ident == $value:expr),* }) => {
@@ -26,12 +26,20 @@ async fn main() -> Result<()> {
         "Upload demo, then retrieve info",
         &harness,
         |test| async move {
+            let data = std::fs::read("data/gully.dem")?;
+            let upload_data = data.clone();
+            let parser = DemoParser::new(BitReadBuffer::new(data, LittleEndian).into());
+            let (header, state) = parser
+                .parse()
+                .map_err(|_| Report::msg("Failed to parse demo"))?;
+            let state = &state;
+
             let id = test
                 .step("upload", |client| async move {
                     Ok(client
                         .upload_demo(
                             String::from("test.dem"),
-                            std::fs::read("data/gully.dem")?,
+                            upload_data,
                             String::from("RED"),
                             String::from("BLUE"),
                             String::from("token"),
@@ -42,7 +50,7 @@ async fn main() -> Result<()> {
 
             assert_eq(id, 1)?;
 
-            test.step("get", |client| async move {
+            test.step("get demo", |client| async move {
                 let demo = client.get(id).await?;
                 assert_object_eq!(demo => {
                     id == 1,
@@ -52,13 +60,19 @@ async fn main() -> Result<()> {
                     blue_score == 3,
                     player_count == 12,
                 });
-                verify_demo(&demo, std::fs::read("data/gully.dem")?)?;
+                verify_demo(&demo, &header, state)?;
                 assert_eq(demo.uploader.id(), 1)?;
 
                 let uploader = demo.uploader.resolve(client).await?;
                 assert_eq(&uploader.name, "Icewind")?;
 
                 Ok(())
+            })
+            .await?;
+
+            test.step("chat", |client| async move {
+                let chat = client.get_chat(id).await?;
+                verify_chat(&chat, state)
             })
             .await?;
             Ok(())
@@ -69,7 +83,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn verify_demo(api_result: &Demo, demo: Vec<u8>) -> Result<()> {
+fn verify_demo(api_result: &Demo, header: &Header, state: &MatchState) -> Result<()> {
     use tf_demo_parser::demo::parser::gamestateanalyser;
 
     fn map_team(team: Team) -> gamestateanalyser::Team {
@@ -93,10 +107,6 @@ fn verify_demo(api_result: &Demo, demo: Vec<u8>) -> Result<()> {
         }
     }
 
-    let parser = DemoParser::new(BitReadBuffer::new(demo, LittleEndian).into());
-    let (header, state) = parser
-        .parse()
-        .map_err(|_| Report::msg("Failed to parse demo"))?;
     assert_eq(&api_result.map, &header.map).wrap_err("Failed to compare map")?;
     assert_eq(
         api_result.red_score,
@@ -116,6 +126,9 @@ fn verify_demo(api_result: &Demo, demo: Vec<u8>) -> Result<()> {
             .count() as u8,
     )
     .wrap_err("Failed to compare blue score")?;
+    assert_eq(&api_result.server, &header.server).wrap_err("Failed to compare server")?;
+    assert_eq(&api_result.nick, &header.nick).wrap_err("Failed to compare server")?;
+    assert_eq(api_result.duration, header.duration as u16).wrap_err("Failed to compare server")?;
 
     let mut players = state
         .users
@@ -179,6 +192,26 @@ fn verify_demo(api_result: &Demo, demo: Vec<u8>) -> Result<()> {
             .wrap_err_with(|| format!("Failed to compare assists for {}", api_player.user.name))?;
         assert_eq(api_player.deaths, deaths)
             .wrap_err_with(|| format!("Failed to compare deaths for {}", api_player.user.name))?;
+    }
+
+    Ok(())
+}
+
+fn verify_chat(chat: &[ChatMessage], state: &MatchState) -> Result<()> {
+    assert_eq(chat.len(), state.chat.len())
+        .wrap_err("Failed to compare number of chat messages")?;
+
+    let mut demo_chat = state.chat.clone();
+    demo_chat.sort_by(|a, b| a.tick.cmp(&b.tick));
+
+    for (api_chat, chat) in chat.iter().zip(demo_chat.iter()) {
+        assert_eq(&api_chat.message, &chat.text).wrap_err("Failed to compare chat message")?;
+        assert_eq(&api_chat.user, &chat.from).wrap_err("Failed to compare chat message sender")?;
+        // assert_eq(
+        //     api_chat.time,
+        //     (chat.tick as f32 * state.interval_per_tick) as u32,
+        // )
+        // .wrap_err("Failed to compare chat message time")?;
     }
 
     Ok(())

@@ -23,7 +23,7 @@ impl Test {
             println!("      {}", "❌".red());
             return;
         } else {
-            println!("   {}", "Reset api server".green());
+            println!("    - {}", "Reset api server".green());
         }
 
         let test = Test {
