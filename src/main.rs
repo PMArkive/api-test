@@ -21,7 +21,7 @@ macro_rules! assert_object_eq {
 #[tokio::main]
 async fn main() -> Result<()> {
     let harness = Harness::new(&dotenv::var("BASE_URL")?, &dotenv::var("DB_URL")?).await?;
-    let gully_data = include_bytes!("../data/gully.dem");
+    let gully_data = include_bytes!("../data/granary.dem");
 
     Test::run(
         "Upload demo, then retrieve info",
@@ -55,9 +55,9 @@ async fn main() -> Result<()> {
                 assert_object_eq!(demo => {
                     id == 1,
                     name == "test.dem",
-                    map == "cp_gullywash_final1",
-                    red_score == 5,
-                    blue_score == 3,
+                    map == "cp_granary_pro_rc8",
+                    red_score == 0,
+                    blue_score == 1,
                     player_count == 12,
                 });
                 verify_demo(&demo, &header, state)?;
