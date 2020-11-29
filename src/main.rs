@@ -94,6 +94,8 @@ async fn main() -> Result<()> {
                     red_score == 0,
                     blue_score == 1,
                     player_count == 12,
+                    url == "https://localhost/ec/68/ec681d1b4846a7e3cb2c129fcbd858ac_test.dem",
+                    backend == "static",
                 });
                 verify_demo(&demo, &header, state)?;
                 assert_eq(demo.uploader.id(), 1)?;
@@ -322,6 +324,124 @@ async fn main() -> Result<()> {
             assert_eq(list[0].id, 2)?;
             assert_eq(list[1].id, 1)?;
             Ok(())
+        })
+        .await?;
+
+        Ok(())
+    })
+    .await;
+
+    Test::run("Set url", &harness, |test| async move {
+        let id = test
+            .step("upload", |client| async move {
+                Ok(client
+                    .upload_demo(
+                        String::from("test.dem"),
+                        granary_data.to_vec(),
+                        String::from("RED"),
+                        String::from("BLUE"),
+                        String::from("token"),
+                    )
+                    .await?)
+            })
+            .await?;
+
+        assert_eq(id, 1)?;
+
+        let hash = test
+            .step("get before", |client| async move {
+                let demo = client.get(id).await?;
+                assert_object_eq!(demo => {
+                    id == 1,
+                    name == "test.dem",
+                    map == "cp_granary_pro_rc8",
+                    red_score == 0,
+                    blue_score == 1,
+                    player_count == 12,
+                    url == "https://localhost/ec/68/ec681d1b4846a7e3cb2c129fcbd858ac_test.dem",
+                    backend == "static",
+                });
+
+                Ok(demo.hash)
+            })
+            .await?;
+
+        test.step("set url", |client| async move {
+            client
+                .set_url(
+                    id,
+                    "example",
+                    "somedemo.dem",
+                    "https://example.com/somedemo.dem",
+                    hash,
+                    "edit",
+                )
+                .await?;
+
+            Ok(())
+        })
+        .await?;
+
+        test.step("get after", |client| async move {
+            let demo = client.get(id).await?;
+            assert_object_eq!(demo => {
+                id == 1,
+                name == "test.dem",
+                map == "cp_granary_pro_rc8",
+                red_score == 0,
+                blue_score == 1,
+                player_count == 12,
+                url == "https://example.com/somedemo.dem",
+                backend == "example",
+            });
+
+            Ok(())
+        })
+        .await?;
+
+        test.step("set url invalid key", |client| async move {
+            let result = client
+                .set_url(
+                    id,
+                    "example",
+                    "somedemo.dem",
+                    "https://invalid.com/somedemo.dem",
+                    hash,
+                    "invalid",
+                )
+                .await;
+
+            match result {
+                Ok(_) => Err(Report::msg("Expected error during upload")),
+                Err(demostf_client::Error::InvalidApiKey) => Ok(()),
+                Err(e) => Err(Report::msg(format!(
+                    "Unexpected error during set url: {}",
+                    e
+                ))),
+            }
+        })
+        .await?;
+
+        test.step("set url invalid hash", |client| async move {
+            let result = client
+                .set_url(
+                    id,
+                    "example",
+                    "somedemo.dem",
+                    "https://invalid.com/somedemo.dem",
+                    [1; 16],
+                    "edit",
+                )
+                .await;
+
+            match result {
+                Ok(_) => Err(Report::msg("Expected error during upload")),
+                Err(demostf_client::Error::HashMisMatch) => Ok(()),
+                Err(e) => Err(Report::msg(format!(
+                    "Unexpected error during set url: {}",
+                    e
+                ))),
+            }
         })
         .await?;
 
