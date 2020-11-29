@@ -5,7 +5,7 @@ authors = ["Robin Appelman <robin@icewind.nl>"]
 edition = "2018"
 
 [dependencies]
-demostf-client = { version = "0.1.2", default-features = false, features = ["rustls-tls"] }
+demostf-client = { version = "0.1.4", default-features = false, features = ["rustls-tls"] }
 sqlx = { version = "0.4", features = ["postgres", "runtime-tokio-rustls"] }
 dotenv = "0.15.0"
 color-eyre = "0.5.8"

@@ -4,10 +4,11 @@ mod report;
 use crate::harness::Harness;
 use bitbuffer::{BitReadBuffer, LittleEndian};
 use color_eyre::{eyre::WrapErr, Report, Result};
-use demostf_client::{ChatMessage, Class, Demo, ListParams, SteamID, Team};
+use demostf_client::{ChatMessage, Class, Demo, GameType, ListOrder, ListParams, SteamID, Team};
 use report::{assert_eq, Test};
 use std::str::FromStr;
 use tf_demo_parser::{demo::header::Header, DemoParser, MatchState};
+use tokio::time::Duration;
 
 macro_rules! assert_object_eq {
     ($obj:expr => { $($name:ident == $value:expr),* }) => {
@@ -25,6 +26,7 @@ async fn main() -> Result<()> {
     let process_data = include_bytes!("../data/process.dem");
     let warmfrost_data = include_bytes!("../data/warmfrost.dem");
     let coalplant_data = include_bytes!("../data/coalplant.dem");
+    let ultiduo_data = include_bytes!("../data/ultiduo.dem");
 
     Test::run(
         "Upload with invalid credentials",
@@ -170,6 +172,10 @@ async fn main() -> Result<()> {
                     String::from("token"),
                 )
                 .await?;
+
+            // ensure there is some time separation
+            std::thread::sleep(Duration::from_secs(1));
+
             client
                 .upload_demo(
                     String::from("test3.dem"),
@@ -179,10 +185,23 @@ async fn main() -> Result<()> {
                     String::from("token"),
                 )
                 .await?;
+
+            // ensure there is some time separation
+            std::thread::sleep(Duration::from_secs(1));
+
             client
                 .upload_demo(
-                    String::from("test3.dem"),
+                    String::from("test4.dem"),
                     coalplant_data.to_vec(),
+                    String::from("RED"),
+                    String::from("BLUE"),
+                    String::from("token"),
+                )
+                .await?;
+            client
+                .upload_demo(
+                    String::from("test5.dem"),
+                    ultiduo_data.to_vec(),
                     String::from("RED"),
                     String::from("BLUE"),
                     String::from("token"),
@@ -194,11 +213,114 @@ async fn main() -> Result<()> {
 
         test.step("list defaults", |client| async move {
             let list = client.list(ListParams::default(), 1).await?;
-            assert_eq(list.len(), 4)?;
-            assert_eq(list[0].id, 4)?;
-            assert_eq(list[1].id, 3)?;
-            assert_eq(list[2].id, 2)?;
-            assert_eq(list[3].id, 1)?;
+            assert_eq(list.len(), 5)?;
+            assert_eq(list[0].id, 5)?;
+            assert_eq(list[1].id, 4)?;
+            assert_eq(list[2].id, 3)?;
+            assert_eq(list[3].id, 2)?;
+            assert_eq(list[4].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list asc", |client| async move {
+            let list = client
+                .list(ListParams::default().with_order(ListOrder::Ascending), 1)
+                .await?;
+            assert_eq(list.len(), 5)?;
+            assert_eq(list[0].id, 1)?;
+            assert_eq(list[1].id, 2)?;
+            assert_eq(list[2].id, 3)?;
+            assert_eq(list[3].id, 4)?;
+            assert_eq(list[4].id, 5)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list map filter", |client| async move {
+            let list = client
+                .list(ListParams::default().with_map("cp_process"), 1)
+                .await?;
+            assert_eq(list.len(), 1)?;
+            assert_eq(list[0].id, 2)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list single player filter", |client| async move {
+            let list = client
+                .list(
+                    ListParams::default().with_players(vec![76561197992327511]),
+                    1,
+                )
+                .await?;
+            assert_eq(list.len(), 2)?;
+            assert_eq(list[0].id, 5)?;
+            assert_eq(list[1].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list multiple player filter", |client| async move {
+            let list = client
+                .list(
+                    ListParams::default().with_players(vec![76561197992327511, 76561198024494988]),
+                    1,
+                )
+                .await?;
+            assert_eq(list.len(), 1)?;
+            assert_eq(list[0].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list player and map filter", |client| async move {
+            let list = client
+                .list(
+                    ListParams::default()
+                        .with_players(vec![76561197992327511])
+                        .with_map("cp_granary_pro"),
+                    1,
+                )
+                .await?;
+            assert_eq(list.len(), 1)?;
+            assert_eq(list[0].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        let first_time = test
+            .step("list type filter", |client| async move {
+                let list = client
+                    .list(ListParams::default().with_type(GameType::Fours), 1)
+                    .await?;
+                assert_eq(list.len(), 2)?;
+                assert_eq(list[0].id, 4)?;
+                assert_eq(list[1].id, 3)?;
+                Ok(list[1].time)
+            })
+            .await?;
+
+        test.step("list time filter after", |client| async move {
+            let list = client
+                .list(ListParams::default().with_after(first_time.clone()), 1)
+                .await?;
+
+            assert_eq(list.len(), 2)?;
+            assert_eq(list[0].id, 5)?;
+            assert_eq(list[1].id, 4)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list time filter before", |client| async move {
+            let list = client
+                .list(ListParams::default().with_before(first_time.clone()), 1)
+                .await?;
+
+            assert_eq(list.len(), 2)?;
+            assert_eq(list[0].id, 2)?;
+            assert_eq(list[1].id, 1)?;
             Ok(())
         })
         .await?;
