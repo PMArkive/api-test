@@ -28,6 +28,9 @@ async fn main() -> Result<()> {
     let coalplant_data = include_bytes!("../data/coalplant.dem");
     let ultiduo_data = include_bytes!("../data/ultiduo.dem");
 
+    let edit_key = dotenv::var("EDIT_KEY")?;
+    let edit_key = &edit_key;
+
     Test::run(
         "Upload with invalid credentials",
         &harness,
@@ -374,7 +377,7 @@ async fn main() -> Result<()> {
                     "somedemo.dem",
                     "https://example.com/somedemo.dem",
                     hash,
-                    "edit",
+                    edit_key,
                 )
                 .await?;
 
@@ -430,7 +433,7 @@ async fn main() -> Result<()> {
                     "somedemo.dem",
                     "https://invalid.com/somedemo.dem",
                     [1; 16],
-                    "edit",
+                    edit_key,
                 )
                 .await;
 
