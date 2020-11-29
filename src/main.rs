@@ -21,14 +21,14 @@ macro_rules! assert_object_eq {
 #[tokio::main]
 async fn main() -> Result<()> {
     let harness = Harness::new(&dotenv::var("BASE_URL")?, &dotenv::var("DB_URL")?).await?;
+    let gully_data = include_bytes!("../data/gully.dem");
 
     Test::run(
         "Upload demo, then retrieve info",
         &harness,
         |test| async move {
-            let data = std::fs::read("data/gully.dem")?;
-            let upload_data = data.clone();
-            let parser = DemoParser::new(BitReadBuffer::new(data, LittleEndian).into());
+            let parser =
+                DemoParser::new(BitReadBuffer::new(gully_data.to_vec(), LittleEndian).into());
             let (header, state) = parser
                 .parse()
                 .map_err(|_| Report::msg("Failed to parse demo"))?;
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
                     Ok(client
                         .upload_demo(
                             String::from("test.dem"),
-                            upload_data,
+                            gully_data.to_vec(),
                             String::from("RED"),
                             String::from("BLUE"),
                             String::from("token"),
