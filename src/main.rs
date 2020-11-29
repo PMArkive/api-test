@@ -24,6 +24,36 @@ async fn main() -> Result<()> {
     let gully_data = include_bytes!("../data/granary.dem");
 
     Test::run(
+        "Upload with invalid credentials",
+        &harness,
+        |test| async move {
+            test.step("upload", |client| async move {
+                let result = client
+                    .upload_demo(
+                        String::from("test.dem"),
+                        gully_data.to_vec(),
+                        String::from("RED"),
+                        String::from("BLUE"),
+                        String::from("wrong_token"),
+                    )
+                    .await;
+
+                match result {
+                    Ok(_) => Err(Report::msg("Expected error during upload")),
+                    Err(demostf_client::Error::InvalidApiKey) => Ok(()),
+                    Err(e) => Err(Report::msg(format!(
+                        "Unexpected error during upload: {}",
+                        e
+                    ))),
+                }
+            })
+            .await?;
+            Ok(())
+        },
+    )
+    .await;
+
+    Test::run(
         "Upload demo, then retrieve info",
         &harness,
         |test| async move {
@@ -95,6 +125,23 @@ async fn main() -> Result<()> {
                 verify_chat(&chat, state)
             })
             .await?;
+
+            test.step("upload_again", |client| async move {
+                let new_id = client
+                    .upload_demo(
+                        String::from("test.dem"),
+                        gully_data.to_vec(),
+                        String::from("RED"),
+                        String::from("BLUE"),
+                        String::from("token"),
+                    )
+                    .await?;
+
+                assert_eq(id, new_id)?;
+                Ok(())
+            })
+            .await?;
+
             Ok(())
         },
     )
