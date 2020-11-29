@@ -4,7 +4,7 @@ mod report;
 use crate::harness::Harness;
 use bitbuffer::{BitReadBuffer, LittleEndian};
 use color_eyre::{eyre::WrapErr, Report, Result};
-use demostf_client::{ChatMessage, Class, Demo, SteamID, Team};
+use demostf_client::{ChatMessage, Class, Demo, ListParams, SteamID, Team};
 use report::{assert_eq, Test};
 use std::str::FromStr;
 use tf_demo_parser::{demo::header::Header, DemoParser, MatchState};
@@ -65,6 +65,26 @@ async fn main() -> Result<()> {
 
                 let uploader = demo.uploader.resolve(client).await?;
                 assert_eq(&uploader.name, "Icewind")?;
+
+                Ok(())
+            })
+            .await?;
+
+            test.step("list demos", |client| async move {
+                let list = client.list(ListParams::default(), 1).await?;
+                assert_eq(list.len(), 1)?;
+                assert_object_eq!(list[0] => {
+                    id == 1,
+                    name == "test.dem",
+                    map == "cp_granary_pro_rc8",
+                    red_score == 0,
+                    blue_score == 1,
+                    player_count == 12,
+                });
+                assert_eq(list[0].uploader.id(), 1)?;
+
+                let page2 = client.list(ListParams::default(), 2).await?;
+                assert_eq(page2.len(), 0)?;
 
                 Ok(())
             })
