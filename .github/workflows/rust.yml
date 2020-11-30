@@ -1,4 +1,4 @@
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 name: CI
 
@@ -61,3 +61,22 @@ jobs:
           EDIT_KEY: edit
         with:
           command: run
+
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-linux-musl
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target x86_64-unknown-linux-musl
+      - uses: actions/upload-artifact@v2
+        with:
+          name: api-test
+          path: target/x86_64-unknown-linux-musl/release/api-test
