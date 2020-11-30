@@ -1,5 +1,7 @@
 # api-test
 
+![Build Status](https://github.com/demostf/api-test/workflows/CI/badge.svg)
+
 Test suite for demos.tf api 
 
 ## Usage
