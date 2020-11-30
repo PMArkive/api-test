@@ -13,6 +13,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         with:
           command: check
@@ -54,10 +55,11 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         env:
           DB_URL: postgres://postgres:test@localhost/postgres
-          API_ROOT: http://localhost/
+          BASE_URL: http://localhost/
           EDIT_KEY: edit
         with:
           command: run
@@ -72,6 +74,7 @@ jobs:
         with:
           toolchain: stable
           target: x86_64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         with:
           command: build
