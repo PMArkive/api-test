@@ -15,13 +15,13 @@ impl Test {
         name: &str,
         harness: &'a Harness,
         f: F,
-    ) {
+    ) -> bool {
         println!(" - {}", name);
 
         if let Err(e) = harness.reset().await {
             println!("   {}: {:#}", "Reset api server".red(), e);
             println!("      {}", "❌".red());
-            return;
+            return false;
         } else {
             println!("    - {}", "Reset api server".green());
         }
@@ -33,9 +33,11 @@ impl Test {
         match f(test).await {
             Ok(_) => {
                 println!("      {}", "✓".green());
+                true
             }
             Err(e) => {
                 println!("      {}: {:#}", "❌".red(), e);
+                false
             }
         }
     }

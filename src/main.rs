@@ -31,7 +31,9 @@ async fn main() -> Result<()> {
     let edit_key = dotenv::var("EDIT_KEY")?;
     let edit_key = &edit_key;
 
-    Test::run(
+    let mut success = true;
+
+    success &= Test::run(
         "Upload with invalid credentials",
         &harness,
         |test| async move {
@@ -61,7 +63,7 @@ async fn main() -> Result<()> {
     )
     .await;
 
-    Test::run(
+    success &= Test::run(
         "Upload demo, then retrieve info",
         &harness,
         |test| async move {
@@ -157,7 +159,7 @@ async fn main() -> Result<()> {
     )
     .await;
 
-    Test::run("Listings", &harness, |test| async move {
+    success &= Test::run("Listings", &harness, |test| async move {
         test.step("upload", |client| async move {
             client
                 .upload_demo(
@@ -334,7 +336,7 @@ async fn main() -> Result<()> {
     })
     .await;
 
-    Test::run("Set url", &harness, |test| async move {
+    success &= Test::run("Set url", &harness, |test| async move {
         let id = test
             .step("upload", |client| async move {
                 Ok(client
@@ -451,6 +453,10 @@ async fn main() -> Result<()> {
         Ok(())
     })
     .await;
+
+    if !success {
+        std::process::exit(1);
+    }
 
     Ok(())
 }
