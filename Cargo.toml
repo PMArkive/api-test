@@ -11,8 +11,8 @@ dotenv = "0.15.0"
 color-eyre = "0.5.8"
 colored = "2"
 tokio = { version = "0.2", features = ["macros", "rt-core"] }
-tf-demo-parser = "0.1"
-bitbuffer = "0.7.1"
+tf-demo-parser = "0.2"
+bitbuffer = "0.8"
 
 [profile.dev.package.tf-demo-parser]
 opt-level = 3

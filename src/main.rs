@@ -67,8 +67,7 @@ async fn main() -> Result<()> {
         "Upload demo, then retrieve info",
         &harness,
         |test| async move {
-            let parser =
-                DemoParser::new(BitReadBuffer::new(granary_data.to_vec(), LittleEndian).into());
+            let parser = DemoParser::new(BitReadBuffer::new(granary_data, LittleEndian).into());
             let (header, state) = parser
                 .parse()
                 .map_err(|_| Report::msg("Failed to parse demo"))?;

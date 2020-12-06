@@ -117,20 +117,21 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "bitbuffer"
-version = "0.7.1"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6007718437539bc4564d96742ad7a86adf1244b5fb6e0381b426034f957edb7f"
+checksum = "e2b3cd4415fb790abfc898cd449f319029933a867462634dbd427c3f884ba6c5"
 dependencies = [
  "bitbuffer_derive",
+ "err-derive",
  "memchr",
  "num-traits 0.2.14",
 ]
 
 [[package]]
 name = "bitbuffer_derive"
-version = "0.7.1"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d481746ea558a93cdbd62cd9766ab7f56789dcb2605b8344727c5ee92007070"
+checksum = "7f51dcbe693d21078994abd2afac5adc9bcc80fbdf80206ebdb33fec4a145693"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1813,9 +1814,9 @@ checksum = "36474e732d1affd3a6ed582781b3683df3d0563714c59c39591e8ff707cf078e"
 
 [[package]]
 name = "tf-demo-parser"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aefd410a68248ad4192147294341137e0068467b3f2101ee0a6528b1c36123cf"
+checksum = "c55bccc934036ee9fb1c88106ef3b23a4375bc2fb7cddb735e15d1f265561713"
 dependencies = [
  "bitbuffer",
  "enumflags2",
