@@ -337,9 +337,9 @@ dependencies = [
 
 [[package]]
 name = "demostf-client"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a93173a049ea144a947ebbaf115bce8a95f57396b9f5ffa7449d1b2e9da46607"
+checksum = "63004130b42c097bd2b5f30ec219a3a96c13d8ba142d3ea60e96c391cb84875e"
 dependencies = [
  "chrono",
  "hex",

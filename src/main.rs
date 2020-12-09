@@ -111,6 +111,20 @@ async fn main() -> Result<()> {
             })
             .await?;
 
+            test.step("not found", |client| async move {
+                let result = client.get(10).await;
+
+                match result {
+                    Ok(_) => Err(Report::msg("Expected error during upload")),
+                    Err(demostf_client::Error::DemoNotFound(10)) => Ok(()),
+                    Err(e) => Err(Report::msg(format!(
+                        "Unexpected error during set url: {}",
+                        e
+                    ))),
+                }
+            })
+            .await?;
+
             test.step("list demos", |client| async move {
                 let list = client.list(ListParams::default(), 1).await?;
                 assert_eq(list.len(), 1)?;
@@ -327,6 +341,29 @@ async fn main() -> Result<()> {
             assert_eq(list.len(), 2)?;
             assert_eq(list[0].id, 2)?;
             assert_eq(list[1].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list by uploader", |client| async move {
+            let list = client
+                .list_uploads(
+                    SteamID::from(76561197992327511),
+                    ListParams::default().with_order(ListOrder::Ascending),
+                    1,
+                )
+                .await?;
+            assert_eq(list.len(), 0)?;
+
+            let list = client
+                .list_uploads(
+                    SteamID::from(76561198024494988),
+                    ListParams::default().with_order(ListOrder::Ascending),
+                    1,
+                )
+                .await?;
+            assert_eq(list.len(), 5)?;
+            assert_eq(list[0].id, 1)?;
             Ok(())
         })
         .await?;
