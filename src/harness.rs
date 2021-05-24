@@ -27,7 +27,6 @@ impl Harness {
         let tables = [
             "chat",
             "demos",
-            "kills",
             "players",
             "storage_keys",
             "teams",
