@@ -6,7 +6,7 @@ use bitbuffer::{BitReadBuffer, LittleEndian};
 use color_eyre::{eyre::WrapErr, Report, Result};
 use demostf_client::{ChatMessage, Class, Demo, GameType, ListOrder, ListParams, SteamID, Team};
 use report::{assert_eq, Test};
-use std::str::FromStr;
+use std::convert::TryFrom;
 use tf_demo_parser::{demo::header::Header, DemoParser, MatchState};
 use tokio::time::Duration;
 
@@ -551,10 +551,10 @@ fn verify_demo(api_result: &Demo, header: &Header, state: &MatchState) -> Result
         .collect::<Vec<_>>();
 
     players.sort_by(|a, b| {
-        SteamID::from_str(&a.steam_id)
+        SteamID::try_from(a.steam_id.as_str())
             .unwrap()
             .account_id()
-            .cmp(&SteamID::from_str(&b.steam_id).unwrap().account_id())
+            .cmp(&SteamID::try_from(b.steam_id.as_str()).unwrap().account_id())
     });
 
     let mut api_players = api_result.players.iter().collect::<Vec<_>>();
@@ -575,7 +575,7 @@ fn verify_demo(api_result: &Demo, header: &Header, state: &MatchState) -> Result
         })?;
         assert_eq(
             &api_player.user.steam_id,
-            &SteamID::from_str(&player.steam_id).unwrap(),
+            &SteamID::try_from(player.steam_id.as_str()).unwrap(),
         )
         .wrap_err_with(|| format!("Failed to compare steam id for {}", api_player.user.name))?;
         assert_eq(map_team(api_player.team), player.team)
