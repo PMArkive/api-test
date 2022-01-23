@@ -8,11 +8,13 @@ edition = "2018"
 demostf-client = { version = "0.2", default-features = false, features = ["rustls-tls"] }
 sqlx = { version = "0.5", features = ["postgres", "runtime-tokio-rustls"] }
 dotenv = "0.15"
-color-eyre = "0.5"
+color-eyre = "0.6"
 colored = "2"
 tokio = { version = "1", features = ["macros"] }
 tf-demo-parser = "0.3"
 bitbuffer = "0.10"
 
 [profile.dev.package.tf-demo-parser]
+opt-level = 3
+[profile.dev.package.bitbuffer]
 opt-level = 3
