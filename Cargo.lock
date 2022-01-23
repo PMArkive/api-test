@@ -186,8 +186,6 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits 0.2.14",
- "serde",
- "time",
  "winapi",
 ]
 
@@ -295,16 +293,16 @@ dependencies = [
 
 [[package]]
 name = "demostf-client"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96d04e2fe9268ad7e83b0a7bb877139a7723b7342b1d51fc525e4b0bdb52688d"
+checksum = "801a42a53d08d551df88bb53d3259350e6db59ef2a98685ae3df3c14f85c0695"
 dependencies = [
- "chrono",
  "hex",
  "reqwest",
  "serde",
  "steamid-ng",
  "thiserror",
+ "time",
 ]
 
 [[package]]
@@ -976,6 +974,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "num_threads"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71a1eb3a36534514077c1e079ada2fb170ef30c47d203aa6916138cf882ecd52"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
@@ -1717,12 +1724,13 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.1.43"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
+checksum = "c8d54b9298e05179c335de2b9645d061255bcd5155f843b3e328d2cfe0a5b413"
 dependencies = [
  "libc",
- "winapi",
+ "num_threads",
+ "serde",
 ]
 
 [[package]]
