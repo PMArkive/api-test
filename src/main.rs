@@ -294,6 +294,18 @@ async fn main() -> Result<()> {
         })
         .await?;
 
+        test.step("list unknown player filter", |client| async move {
+            let list = client
+                .list(
+                    ListParams::default().with_players(vec![76561197992320000]),
+                    1,
+                )
+                .await?;
+            assert_eq(list.len(), 0)?;
+            Ok(())
+        })
+        .await?;
+
         test.step("list player and map filter", |client| async move {
             let list = client
                 .list(
