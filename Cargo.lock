@@ -271,13 +271,14 @@ dependencies = [
 
 [[package]]
 name = "demostf-client"
-version = "0.3.2"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5452e4c1b655e96b77a090b1613179bf558307a26550d12870bf5e13b9bd0f4b"
+checksum = "ac511db6fc701cca82d726925f8a51403dee9aced24d13cdd2852156cdf550e2"
 dependencies = [
  "bytes",
  "futures-util",
  "hex",
+ "md5",
  "reqwest",
  "serde",
  "steamid-ng",
@@ -783,6 +784,12 @@ checksum = "658646b21e0b72f7866c7038ab086d3d5e1cd6271f060fd37defb241949d0582"
 dependencies = [
  "digest",
 ]
+
+[[package]]
+name = "md5"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "490cc448043f947bae3cbee9c203358d62dbee0db12107a74be5c30ccfd09771"
 
 [[package]]
 name = "memchr"

@@ -498,6 +498,29 @@ async fn main() -> Result<()> {
         })
         .await?;
 
+        test.step("set url of unknown demo", |client| async move {
+            let result = client
+                .set_url(
+                    999999,
+                    "example",
+                    "somedemo.dem",
+                    "https://invalid.com/somedemo.dem",
+                    [1; 16],
+                    edit_key,
+                )
+                .await;
+
+            match result {
+                Ok(_) => Err(Report::msg("Expected error during upload")),
+                Err(demostf_client::Error::DemoNotFound(_)) => Ok(()),
+                Err(e) => Err(Report::msg(format!(
+                    "Unexpected error during set url: {}",
+                    e
+                ))),
+            }
+        })
+        .await?;
+
         Ok(())
     })
     .await;
@@ -569,7 +592,7 @@ fn verify_demo(api_result: &Demo, header: &Header, state: &MatchState) -> Result
             .cmp(&SteamID::try_from(b.steam_id.as_str()).unwrap().account_id())
     });
 
-    let mut api_players = api_result.players.iter().collect::<Vec<_>>();
+    let mut api_players = api_result.players.clone().unwrap();
     api_players.sort_by(|a, b| {
         a.user
             .steam_id
