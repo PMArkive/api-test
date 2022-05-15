@@ -2,7 +2,6 @@ mod harness;
 mod report;
 
 use crate::harness::Harness;
-use bitbuffer::{BitReadBuffer, LittleEndian};
 use color_eyre::{eyre::WrapErr, Report, Result};
 use demostf_client::{ChatMessage, Class, Demo, GameType, ListOrder, ListParams, SteamID, Team};
 use report::{assert_eq, Test};
@@ -67,7 +66,8 @@ async fn main() -> Result<()> {
         "Upload demo, then retrieve info",
         &harness,
         |test| async move {
-            let parser = DemoParser::new(BitReadBuffer::new(granary_data, LittleEndian).into());
+            let demo = tf_demo_parser::Demo::new(granary_data);
+            let parser = DemoParser::new(demo.get_stream());
             let (header, state) = parser
                 .parse()
                 .map_err(|_| Report::msg("Failed to parse demo"))?;
