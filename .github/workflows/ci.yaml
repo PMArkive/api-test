@@ -58,7 +58,7 @@ jobs:
           instance: https://cache.icewind.me
           authToken: '${{ secrets.ATTIC_TOKEN }}'
       - run: nix run
-        with:
+        env:
           DB_URL: postgres://postgres:test@localhost/postgres
           BASE_URL: http://localhost/
           EDIT_KEY: edit

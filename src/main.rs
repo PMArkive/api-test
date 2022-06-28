@@ -386,6 +386,30 @@ async fn main() -> Result<()> {
         })
         .await?;
 
+        test.step("list id filter after", |client| async move {
+            let list = client
+                .list(ListParams::default().with_after_id(3), 1)
+                .await?;
+
+            assert_eq(list.len(), 2)?;
+            assert_eq(list[0].id, 5)?;
+            assert_eq(list[1].id, 4)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list id filter before", |client| async move {
+            let list = client
+                .list(ListParams::default().with_before_id(3), 1)
+                .await?;
+
+            assert_eq(list.len(), 2)?;
+            assert_eq(list[0].id, 2)?;
+            assert_eq(list[1].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
         test.step("list by uploader", |client| async move {
             let list = client
                 .list_uploads(

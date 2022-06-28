@@ -5,13 +5,13 @@ authors = ["Robin Appelman <robin@icewind.nl>"]
 edition = "2018"
 
 [dependencies]
-demostf-client = { version = "0.4.1", default-features = false, features = ["rustls-tls"] }
-sqlx = { version = "0.5", features = ["postgres", "runtime-tokio-rustls"] }
-dotenv = "0.15"
-color-eyre = "0.6"
-colored = "2"
-tokio = { version = "1", features = ["macros"] }
-tf-demo-parser = "0.4"
+demostf-client = { version = "0.4.2", default-features = false, features = ["rustls-tls"] }
+sqlx = { version = "0.6.0", features = ["postgres", "runtime-tokio-rustls"] }
+dotenv = "0.15.0"
+color-eyre = "0.6.1"
+colored = "2.0.0"
+tokio = { version = "1.19.2", features = ["macros"] }
+tf-demo-parser = "0.4.0"
 
 [profile.dev.package.tf-demo-parser]
 opt-level = 3
