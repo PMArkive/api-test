@@ -1,0 +1,82 @@
+name: "CI"
+on:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: nschloe/action-cached-lfs-checkout@v1
+      - uses: cachix/install-nix-action@v26
+      - uses: icewind1991/attic-action@v1
+        with:
+          name: ci
+          instance: https://cache.icewind.me
+          authToken: '${{ secrets.ATTIC_TOKEN }}'
+      - run: nix build
+
+  run:
+    runs-on: ubuntu-latest
+    name: Run
+    needs: build
+
+    services:
+      api-test-db:
+        image: demostf/db
+        env:
+          POSTGRES_PASSWORD: test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+      api:
+        image: demostf/api
+        env:
+          DEMO_ROOT: /tmp
+          DEMO_HOST: localhost
+          DB_TYPE: pgsql
+          DB_HOST: api-test-db
+          DB_PORT: 5432
+          DB_DATABASE: postgres
+          DB_USERNAME: postgres
+          DB_PASSWORD: test
+          APP_ROOT: https://api.localhost
+          EDIT_SECRET: edit
+      api-test:
+        image: demostf/api-nginx-test
+        env:
+          POSTGRES_PASSWORD: test
+        ports:
+          - 80:80
+
+    steps:
+      - uses: nschloe/action-cached-lfs-checkout@v1
+      - uses: cachix/install-nix-action@v26
+      - uses: icewind1991/attic-action@v1
+        with:
+          name: ci
+          instance: https://cache.icewind.me
+          authToken: '${{ secrets.ATTIC_TOKEN }}'
+      - run: nix run
+        with:
+          DB_URL: postgres://postgres:test@localhost/postgres
+          BASE_URL: http://localhost/
+          EDIT_KEY: edit
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build, run]
+    steps:
+      - name: Checkout code
+        uses: nschloe/action-cached-lfs-checkout@v1
+      - uses: cachix/install-nix-action@v26
+      - uses: icewind1991/attic-action@v1
+        with:
+          name: ci
+          instance: https://cache.icewind.me
+          authToken: '${{ secrets.ATTIC_TOKEN }}'
+      - run: nix build .#docker
+      - name: Push image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          skopeo copy --dest-creds="${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" "docker-archive:$(nix build .#docker --print-out-paths)" "docker://demostf/api-test"

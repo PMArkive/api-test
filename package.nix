@@ -5,12 +5,14 @@
   openssl,
 }: let
   inherit (lib.sources) sourceByRegex;
+  inherit (builtins) fromTOML readFile;
+  version = (fromTOML (readFile ./Cargo.toml)).package.version;
+  src = sourceByRegex ./. ["Cargo.*" "(src|data)(/.*)?"];
 in
   rustPlatform.buildRustPackage rec {
     pname = "demostf-api-test";
-    version = "0.1.0";
 
-    src = sourceByRegex ./. ["Cargo.*" "(src|data)(/.*)?"];
+    inherit src version;
 
     buildInputs = [openssl];
 

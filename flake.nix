@@ -32,8 +32,16 @@
       ];
     in rec {
       packages = rec {
-        inherit (pkgs) demostf-api-test;
+        inherit (pkgs) demostf-api-test demostf-api-test-docker;
+        docker = demostf-api-test-docker;
         default = demostf-api-test;
+      };
+      apps = rec {
+        api-test = {
+          type = "app";
+          program = "${pkgs.demostf-api-test}/bin/api-test";
+        };
+        default = api-test;
       };
       devShells.default = pkgs.mkShell {
         nativeBuildInputs = tools ++ dependencies;
