@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     let granary_data = include_bytes!("../data/granary.dem");
     let process_data = include_bytes!("../data/process.dem");
     let warmfrost_data = include_bytes!("../data/warmfrost.dem");
-    let coalplant_data = include_bytes!("../data/coalplant.dem");
+    let reconnect_data = include_bytes!("../data/reconnect.dem");
     let ultiduo_data = include_bytes!("../data/ultiduo.dem");
 
     let edit_key = dotenv::var("EDIT_KEY")?;
@@ -212,7 +212,7 @@ async fn main() -> Result<()> {
             client
                 .upload_demo(
                     String::from("test4.dem"),
-                    coalplant_data.to_vec(),
+                    reconnect_data.to_vec(),
                     String::from("RED"),
                     String::from("BLUE"),
                     String::from("token"),
@@ -274,9 +274,10 @@ async fn main() -> Result<()> {
                     1,
                 )
                 .await?;
-            assert_eq(list.len(), 2)?;
+            assert_eq(list.len(), 3)?;
             assert_eq(list[0].id, 5)?;
-            assert_eq(list[1].id, 1)?;
+            assert_eq(list[1].id, 4)?;
+            assert_eq(list[2].id, 1)?;
             Ok(())
         })
         .await?;
@@ -288,8 +289,26 @@ async fn main() -> Result<()> {
                     1,
                 )
                 .await?;
+            assert_eq(list.len(), 2)?;
+            assert_eq(list[0].id, 4)?;
+            assert_eq(list[1].id, 1)?;
+            Ok(())
+        })
+        .await?;
+
+        test.step("list reconnected player filter", |client| async move {
+            let list = client
+                .list(
+                    ListParams::default().with_players(vec![
+                        76561198024494988,
+                        76561198011495003,
+                        76561197998883586, // <- reconnected
+                    ]),
+                    1,
+                )
+                .await?;
             assert_eq(list.len(), 1)?;
-            assert_eq(list[0].id, 1)?;
+            assert_eq(list[0].id, 4)?;
             Ok(())
         })
         .await?;
@@ -326,10 +345,9 @@ async fn main() -> Result<()> {
                 let list = client
                     .list(ListParams::default().with_type(GameType::Fours), 1)
                     .await?;
-                assert_eq(list.len(), 2)?;
-                assert_eq(list[0].id, 4)?;
-                assert_eq(list[1].id, 3)?;
-                Ok(list[1].time)
+                assert_eq(list.len(), 1)?;
+                assert_eq(list[0].id, 3)?;
+                Ok(list[0].time)
             })
             .await?;
 
