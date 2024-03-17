@@ -309,6 +309,17 @@ async fn main() -> Result<()> {
                 .await?;
             assert_eq(list.len(), 1)?;
             assert_eq(list[0].id, 4)?;
+
+            let players = list[0].get_players(&client).await?;
+            let reconnected_player = players
+                .iter()
+                .find(|player| player.user.steam_id == SteamID::from(76561197998883586))
+                .expect("player not found");
+
+            // note that these include post-game kills so the exact values might need to change if the parser ever starts excluding those
+            assert_eq(reconnected_player.kills, 26)?;
+            assert_eq(reconnected_player.assists, 22)?;
+            assert_eq(reconnected_player.deaths, 14)?;
             Ok(())
         })
         .await?;
