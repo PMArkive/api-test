@@ -15,9 +15,6 @@
       cargoTest = false;
       extraPaths = [./data];
       withOverlays = [(import ./nix/overlay.nix)];
-      packages = {
-        test-runner = pkgs: pkgs.test-runner;
-      };
       checks = {
         test = pkgs: pkgs.nixosTest (import ./nix/test.nix);
       };
