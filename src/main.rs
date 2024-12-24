@@ -310,7 +310,7 @@ async fn main() -> Result<()> {
             assert_eq(list.len(), 1)?;
             assert_eq(list[0].id, 4)?;
 
-            let players = list[0].get_players(&client).await?;
+            let players = list[0].get_players(client).await?;
             let reconnected_player = players
                 .iter()
                 .find(|player| player.user.steam_id == SteamID::from(76561197998883586))
@@ -364,7 +364,7 @@ async fn main() -> Result<()> {
 
         test.step("list time filter after", |client| async move {
             let list = client
-                .list(ListParams::default().with_after(first_time.clone()), 1)
+                .list(ListParams::default().with_after(first_time), 1)
                 .await?;
 
             assert_eq(list.len(), 2)?;
@@ -376,7 +376,7 @@ async fn main() -> Result<()> {
 
         test.step("list time filter before", |client| async move {
             let list = client
-                .list(ListParams::default().with_before(first_time.clone()), 1)
+                .list(ListParams::default().with_before(first_time), 1)
                 .await?;
 
             assert_eq(list.len(), 2)?;

@@ -1,7 +1,7 @@
-use demostf_client::ApiClient;
-use sqlx::{Pool, Postgres};
 use color_eyre::Result;
+use demostf_client::ApiClient;
 use sqlx::postgres::PgPoolOptions;
+use sqlx::{Pool, Postgres};
 
 pub struct Harness {
     client: ApiClient,
@@ -13,14 +13,11 @@ impl Harness {
         let client = ApiClient::with_base_url(base_url)?;
         let db = PgPoolOptions::new()
             .max_connections(5)
-            .connect(&db_url)
+            .connect(db_url)
             .await
             .unwrap();
 
-        Ok(Harness {
-            client,
-            db,
-        })
+        Ok(Harness { client, db })
     }
 
     pub async fn reset(&self) -> Result<()> {
