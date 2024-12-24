@@ -1,50 +1,25 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/release-23.11";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "nixpkgs/nixos-24.11";
+    flakelight = {
+      url = "github:nix-community/flakelight";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    mill-scale = {
+      url = "github:icewind1991/mill-scale";
+      inputs.flakelight.follows = "flakelight";
+    };
   };
-
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-  }:
-  flake-utils.lib.eachDefaultSystem (system: let
-      overlays = [
-        (import ./overlay.nix)
-      ];
-      pkgs = (import nixpkgs) {
-        inherit system overlays;
+  outputs = {mill-scale, ...}:
+    mill-scale ./. {
+      cargoTest = false;
+      extraPaths = [./data];
+      withOverlays = [(import ./nix/overlay.nix)];
+      packages = {
+        test-runner = pkgs: pkgs.test-runner;
       };
-      tools = with pkgs; [
-        rustc
-        cargo
-        bacon
-        cargo-edit
-        cargo-outdated
-        clippy
-        cargo-audit
-        cargo-msrv
-      ];
-      dependencies = with pkgs; [
-        openssl
-        pkg-config
-      ];
-    in rec {
-      packages = rec {
-        inherit (pkgs) demostf-api-test demostf-api-test-docker;
-        docker = demostf-api-test-docker;
-        default = demostf-api-test;
+      checks = {
+        test = pkgs: pkgs.nixosTest (import ./nix/test.nix);
       };
-      apps = rec {
-        api-test = {
-          type = "app";
-          program = "${pkgs.demostf-api-test}/bin/api-test";
-        };
-        default = api-test;
-      };
-      devShells.default = pkgs.mkShell {
-        nativeBuildInputs = tools ++ dependencies;
-      };
-    });
+    };
 }
