@@ -96,6 +96,7 @@
           DB_USERNAME = "demostf";
           APP_ROOT = "http://localhost";
           EDIT_SECRET = "edit";
+          ACCESS_KEY = "access";
           PARSER_PATH = "${pkgs.demostf-parser}/bin/parse_demo";
         };
         user = "demostf";
@@ -108,7 +109,7 @@
     testBinary = lib.getExe pkgs.demostf-api-test;
     initSql = pkgs.fetchurl {
       url = "https://github.com/demostf/db/raw/refs/heads/master/schema.sql";
-      hash = "sha256-AwXN9mh9CRk6HWdvyUR+YdBkpmExNIDOIeDMz6XqjEQ=";
+      hash = "sha256-tdMYDxlvpuQRxHglX46sCldxzsh1cDxkch2lGWnFH8E=";
     };
   in ''
     machine.succeed("mkdir /demos && chmod 0777 /demos");
@@ -120,6 +121,7 @@
     machine.wait_until_succeeds("curl http://127.0.0.1", timeout=45)
     machine.succeed("DB_URL='postgres://demostf:test@localhost/demostf'\
         BASE_URL='http://localhost/'\
+        ACCESS_KEY='access'\
         EDIT_KEY='edit'\
         ${testBinary}", timeout=180)
   '';

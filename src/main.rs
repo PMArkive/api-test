@@ -29,6 +29,8 @@ async fn main() -> Result<()> {
 
     let edit_key = dotenv::var("EDIT_KEY")?;
     let edit_key = &edit_key;
+    let access_key = dotenv::var("ACCESS_KEY")?;
+    let access_key = &access_key;
 
     let mut success = true;
 
@@ -571,6 +573,84 @@ async fn main() -> Result<()> {
                     e
                 ))),
             }
+        })
+        .await?;
+
+        Ok(())
+    })
+    .await;
+
+    success &= Test::run("Private demos", &harness, |test| async move {
+        let id = test
+            .step("upload", |client| async move {
+                Ok(client
+                    .upload_private_demo(
+                        String::from("test.dem"),
+                        granary_data.to_vec(),
+                        String::from("RED"),
+                        String::from("BLUE"),
+                        String::from("token"),
+                    )
+                    .await?)
+            })
+            .await?;
+
+        assert_eq(id, 1)?;
+
+        test.step("get without key", |client| async move {
+            let demo = client.get(id).await?;
+            assert_object_eq!(demo => {
+                id == 1,
+                name == "test.dem",
+                map == "cp_granary_pro_rc8",
+                red_score == 0,
+                blue_score == 1,
+                player_count == 12,
+                url == "",
+                backend == "",
+            });
+
+            Ok(())
+        })
+        .await?;
+
+        test.step("get with key", |client| async move {
+            let mut client = client.clone();
+            client.set_access_key(access_key.clone());
+
+            let demo = client.get(id).await?;
+            assert_object_eq!(demo => {
+                id == 1,
+                name == "test.dem",
+                map == "cp_granary_pro_rc8",
+                red_score == 0,
+                blue_score == 1,
+                player_count == 12,
+                url == "https://localhost/ec/68/ec681d1b4846a7e3cb2c129fcbd858ac_test.dem",
+                backend == "static",
+            });
+
+            Ok(())
+        })
+        .await?;
+
+        test.step("get with wrong key", |client| async move {
+            let mut client = client.clone();
+            client.set_access_key("wrong".into());
+
+            let demo = client.get(id).await?;
+            assert_object_eq!(demo => {
+                id == 1,
+                name == "test.dem",
+                map == "cp_granary_pro_rc8",
+                red_score == 0,
+                blue_score == 1,
+                player_count == 12,
+                url == "",
+                backend == "",
+            });
+
+            Ok(())
         })
         .await?;
 
