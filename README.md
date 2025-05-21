@@ -1,3 +1,5 @@
+# Moved to https://codeberg.org/demostf/api-test
+
 # api-test
 
 ![Build Status](https://github.com/demostf/api-test/workflows/CI/badge.svg)
